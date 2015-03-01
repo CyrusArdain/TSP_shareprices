@@ -5,6 +5,7 @@
 # Copyright:   (c) musashi 2015
 #-------------------------------------------------------------------------------
 
+import operator
 import requests
 from bs4 import BeautifulSoup
 
@@ -20,24 +21,47 @@ soup = BeautifulSoup(response.text)
 
 #Extracts the dates and shareprices
 dates = soup.findAll(name='td', attrs={"class":"leadingCell"})
-price = soup.findAll(name="td",attrs={"class": "packed"}, limit=10)
+prices = soup.findAll(name="td",attrs={"class": "packed"})
 
 
 #Writes to .csv file
 with open('TSP_shareprices.csv', 'wb') as f:
 
-    #Loop for writing each date
+    #Reversed loop for writing each date
     for count in range (0, len(dates)):
 
-            #Converts stored data to ascii format, cleans up format to be .csv compliant
+            #Converts dates to ascii format, cleans up format to be .csv compliant
             date = dates[count].contents[0].encode('ascii')
             date = date.replace(',', '')
             f.write(date)
             f.write(',')
 
-            #Loop for writing each fund price
-            for count2 in range(0,len(price)):
-                temp = price[count2].contents[0].replace('\n', ',')
-                f.write(temp.encode('ascii'))
-            f.write('\n')
+            #Associates every 10 items to each date
+            count2 = 0
+            while prices:
+                price = prices[0].contents[0].replace('\n', ',')
+                f.write(price.encode('ascii'))
+                prices.pop(0)
+                count2 += 1
+                if count2 == 10:
+                   f.write('\n')
+                   break
 f.close()
+
+##def sort_by_column(csv_cont, col, reverse=False):
+##    """
+##    Sorts CSV contents by column name (if col argument is type <str>)
+##    or column index (if col argument is type <int>).
+##
+##    """
+##    header = csv_cont[0]
+##    body = csv_cont[1:]
+##    if isinstance(col, str):
+##        col_index = header.index(col)
+##    else:
+##        col_index = col
+##    body = sorted(body,
+##           key=operator.itemgetter(col_index),
+##           reverse=reverse)
+##    body.insert(0, header)
+##    return body
