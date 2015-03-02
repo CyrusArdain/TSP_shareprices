@@ -5,13 +5,17 @@
 # Copyright:   (c) musashi 2015
 #-------------------------------------------------------------------------------
 
+from bs4 import BeautifulSoup
+
+import csv
+import datetime
 import operator
 import requests
-from bs4 import BeautifulSoup
+import sys
 
 #TSP Shareprice website and input data
 url = 'https://www.tsp.gov/investmentfunds/shareprice/sharePriceHistory.shtml'
-post_data = {"startdate" : "02/25/2015",  "enddate":	"02/27/2015"}
+post_data = {"startdate" : "01/01/2015",  "enddate":	"02/27/2015"}
 
 #Submits POST data to website and gets website output
 response = requests.post(url, data = post_data)
@@ -23,7 +27,6 @@ soup = BeautifulSoup(response.text)
 dates = soup.findAll(name='td', attrs={"class":"leadingCell"})
 prices = soup.findAll(name="td",attrs={"class": "packed"})
 
-
 #Writes to .csv file
 with open('TSP_shareprices.csv', 'wb') as f:
 
@@ -33,6 +36,7 @@ with open('TSP_shareprices.csv', 'wb') as f:
             #Converts dates to ascii format, cleans up format to be .csv compliant
             date = dates[count].contents[0].encode('ascii')
             date = date.replace(',', '')
+            date = datetime.datetime.strptime(date, '%b %d %Y').strftime('%x')
             f.write(date)
             f.write(',')
 
@@ -48,20 +52,15 @@ with open('TSP_shareprices.csv', 'wb') as f:
                    break
 f.close()
 
-##def sort_by_column(csv_cont, col, reverse=False):
-##    """
-##    Sorts CSV contents by column name (if col argument is type <str>)
-##    or column index (if col argument is type <int>).
-##
-##    """
-##    header = csv_cont[0]
-##    body = csv_cont[1:]
-##    if isinstance(col, str):
-##        col_index = header.index(col)
-##    else:
-##        col_index = col
-##    body = sorted(body,
-##           key=operator.itemgetter(col_index),
-##           reverse=reverse)
-##    body.insert(0, header)
-##    return body
+#Load data from .csv file
+data = csv.reader(open('TSP_shareprices.csv'), delimiter=',')
+
+#Sort data
+sortedlist = sorted(data, key=operator.itemgetter(0))    # 0 specifies according to first column we want to sort
+
+#Write the sorted data result into .csv file
+with open('TSP_shareprices.csv', 'wb') as f:
+    fileWriter = csv.writer(f, delimiter=',')
+    for row in sortedlist:
+        fileWriter.writerow(row)
+f.close()
