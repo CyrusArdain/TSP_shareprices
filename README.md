@@ -10,5 +10,5 @@ This script will:
 
 To do...
  - add ability to choose dates
- - sort data to be most recent date last
- - potentially convert date to be 'MM/DD/YYYY'
+ - (Complete) sort data to be most recent date last
+ - (Complete) potentially convert date to be 'MM/DD/YYYY'
